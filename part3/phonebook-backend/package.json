@@ -9,14 +9,16 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:ui": "rm -rf build && cd ../../../fullstack-course/part2/phonebook && npm run build && cp -r build ../../../fullstack-course-backend/part3/phonebook-backend",
     "deploy": "git push heroku",
-    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && npm run deploy",    
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && npm run deploy",
     "logs:prod": "heroku logs --tail"
   },
   "author": "JQM",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
     "express": "^4.18.1",
+    "mongoose": "^6.5.2",
     "morgan": "^1.10.0"
   },
   "devDependencies": {
