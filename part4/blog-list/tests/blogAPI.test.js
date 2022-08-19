@@ -79,12 +79,8 @@ describe("Blog API test to ensure zero regression", () => {
 
 describe("blog API: Del/Update", () => {
   test("delete", async () => {
-    const userCred = {
-      username: "root",
-      password: "joythebig",
-    };
-    const sendBack = await api.post("/api/login").send(userCred);
-    const token=sendBack.body.token.toString()
+
+    const token=helper.user.token
     const newBlog = {
       title: helper.user.username,
       author: "BEEMAN",
@@ -95,11 +91,11 @@ describe("blog API: Del/Update", () => {
     const blog = await api
       .post("/api/blogs")
       .send(newBlog)
-      .set("Authorization", "bearer "+token);
+      .set("Authorization", token);
 
     await api
       .delete(`/api/blogs/${blog.body.id}`)
-      .set("Authorization", "bearer "+token)
+      .set("Authorization", token)
       .expect(204);
   });
 

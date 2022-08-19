@@ -13,7 +13,6 @@ userRouter.post("/", async (request, response) => {
       error: "username must be unique",
     });
   }
-
   if (password.length < 3) {
     return response.status(400).json({
       error: "password must be of length >3",
@@ -22,14 +21,21 @@ userRouter.post("/", async (request, response) => {
 
   // THE MAGICAL SALT ROUNDS, OOOOOOO!!!!!~
   const saltRounds = 10;
+
   const passwordHash = await bcrypt.hash(password, saltRounds);
 
-  const blogs = await Blog.find({ name });
+  let blogs = await Blog.find({ name });
+  let content;
+  if (!blogs[0]) {
+    content = null;
+  } else {
+    content = blogs[0].id;
+  }
   const newUser = new User({
     username,
     name,
     passwordHash,
-    blogs: blogs[0].id,
+    blogs: content,
   });
 
   response.status(201).json(await newUser.save());
