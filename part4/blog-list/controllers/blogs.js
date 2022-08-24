@@ -12,10 +12,14 @@ blogRouter.get("/", async (request, response) => {
 });
 
 blogRouter.get("/:id", async (request, response) => {
-    response.json(
-      await Blog.findById(request.params.id).populate("user", { username: 1, name: 1, id: 1 })
-    );
-  });
+  response.json(
+    await Blog.findById(request.params.id).populate("user", {
+      username: 1,
+      name: 1,
+      id: 1,
+    })
+  );
+});
 
 blogRouter.post("/", userExtractor, async (request, response) => {
   const body = request.body;
@@ -33,7 +37,24 @@ blogRouter.post("/", userExtractor, async (request, response) => {
     user: request.user,
   });
 
-  response.status(201).json(await blog.save());
+  const savedBlog = await blog.save();
+  const asisUser = await User.findById(request.user);
+
+  const updatedUser = {
+    id: asisUser.id,
+    username: asisUser.username,
+    name: asisUser.name,
+    passwordHash: asisUser.passwordHash,
+    blogs: asisUser.blogs.concat(savedBlog._id),
+  };
+
+  await User.findByIdAndUpdate(request.user, updatedUser, {
+    new: true,
+    runValidators: true,
+    context: "query",
+  });
+
+  response.status(201).json(savedBlog);
 });
 
 blogRouter.delete("/:id", userExtractor, async (request, response) => {
@@ -51,11 +72,29 @@ blogRouter.delete("/:id", userExtractor, async (request, response) => {
   response.status(204).json().end();
 });
 
-blogRouter.put("/:id", async (request, response) => {
+blogRouter.post("/:id/comments", async (request, response) => {
+  const blog = await Blog.findById(request.params.id);
+  const updatedBlog = {
+    title: blog.title,
+    author: blog.author,
+    url: blog.url,
+    likes: blog.likes,
+    comments: blog.comments.concat(request.body.comment),
+  };
 
+  const res = await Blog.findByIdAndUpdate(request.params.id, updatedBlog, {
+    new: true,
+    runValidators: true,
+    context: "query",
+  });
+  response.json(res)
+});
+
+blogRouter.put("/:id", async (request, response) => {
+  //This is bad security, but I'm not checking it for right now <3
   const newBlog = {
     title: request.body.title,
-    author: request.body.url,
+    author: request.body.author,
     url: request.body.url,
     likes: request.body.likes,
   };
